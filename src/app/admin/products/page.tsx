@@ -1,12 +1,13 @@
 'use client'
 
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { CARD, ErrorNotice } from '@/components/admin/dashboard/ui'
 import { formatMoney } from '@/components/admin/dashboard/format'
 import { Empty, PageHeader, Pager, Pill, RowSkeleton, SearchInput, Tabs } from '@/components/admin/common/kit'
 import { useAdminList, useDebounced } from '@/components/admin/common/use-admin-list'
-import { ProductPanel } from '@/components/admin/products/product-panel'
 
 type Product = {
   id: number
@@ -47,11 +48,11 @@ export default function AdminProductsPage() {
     per_page: 15,
     page,
   })
-  const [selected, setSelected] = useState<Product | null>(null)
+  const router = useRouter()
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Products" subtitle={meta ? meta.total + (meta.total === 1 ? ' product' : ' products') : 'Loading products'} />
+      <PageHeader title="Products" subtitle={meta ? meta.total + (meta.total === 1 ? ' product' : ' products') : 'Loading products'} action={<Link href="/admin/products/new" className="inline-flex h-11 items-center rounded-xl bg-foreground px-5 text-sm font-medium text-background transition hover:opacity-90">Add product</Link>} />
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <Tabs
@@ -100,8 +101,8 @@ export default function AdminProductsPage() {
                   <tr
                     key={p.id}
                     tabIndex={0}
-                    onClick={() => setSelected(p)}
-                    onKeyDown={(e) => e.key === 'Enter' && setSelected(p)}
+                    onClick={() => router.push('/admin/products/' + p.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && router.push('/admin/products/' + p.id)}
                     className="cursor-pointer border-b border-border outline-none transition last:border-0 hover:bg-muted/60 focus-visible:bg-muted/60"
                   >
                     <td className="px-5 py-3.5">
@@ -135,17 +136,6 @@ export default function AdminProductsPage() {
         <Pager meta={meta} loading={loading} onPage={setPage} />
       </div>
 
-      {selected && (
-        <ProductPanel
-          key={selected.id}
-          id={selected.id}
-          name={selected.name}
-          status={selected.status}
-          slug={selected.slug}
-          onClose={() => setSelected(null)}
-          onChanged={reload}
-        />
-      )}
     </div>
   )
 }
